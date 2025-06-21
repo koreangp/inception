@@ -8,7 +8,7 @@ RUN apt update && apt upgrade -y && \
 
 RUN mkdir -p /var/www/wordpress && \
     curl -o /tmp/latest.tar.gz https://wordpress.org/latest.tar.gz && \
-    tar -xzf /tmp/latest.tar.gz -C /var/www && \
+    tar -xzf /tmp/latest.tar.gz -C /var/www --strip-components=1 && \
     rm /tmp/latest.tar.gz
 
 RUN chown -R www-data:www-data /var/www/wordpress && \
