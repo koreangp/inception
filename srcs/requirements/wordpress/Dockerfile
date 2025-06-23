@@ -1,25 +1,36 @@
 FROM debian:bullseye
 
-
+# Installation des packages nécessaires
 RUN apt update && apt upgrade -y && \
-    apt install -y php php-fpm php-mysql php-curl php-gd php-mbstring php-xml php-xmlrpc php-soap php-intl php-zip \
-    curl mariadb-client unzip && \
+    apt install -y php php-fpm php-mysql php-curl php-gd php-mbstring php-xml php-zip \
+    curl mariadb-client sudo unzip && \
     rm -rf /var/lib/apt/lists/*
 
+# Création des utilisateurs et groupes
+RUN groupadd wordpress
+RUN useradd -m -g wordpress wordpress
+RUN usermod -aG www-data wordpress
+
+# Création des répertoires nécessaires
+RUN mkdir -p /run/php && \
+    chown wordpress:wordpress /run/php
 RUN mkdir -p /var/www/wordpress && \
-    curl -o /tmp/latest.tar.gz https://wordpress.org/latest.tar.gz && \
-    tar -xzf /tmp/latest.tar.gz -C /var/www --strip-components=1 && \
-    rm /tmp/latest.tar.gz
+    chown -R wordpress:wordpress /var/www/wordpress
 
-RUN chown -R www-data:www-data /var/www/wordpress && \
-    chmod -R 775 /var/www/wordpress
+# Installation de WP-CLI
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+    chmod +x wp-cli.phar && \
+    mv wp-cli.phar /usr/local/bin/wp
 
-# 4. Configuration PHP-FPM
-# COPY conf/www.conf /etc/php/*/fpm/pool.d/www.conf
+# Configuration PHP-FPM
+COPY conf/wordpress.conf /etc/php/7.4/fpm/pool.d/wordpress.conf
 
-# 5. Copier un script d'initialisation WordPress (si besoin)
-# COPY tools/init.sh /init.sh
-# RUN chmod +x /init.sh
+# Copier le script d'initialisation WordPress
+COPY tools/init.sh /usr/local/bin/init.sh
+RUN chmod +x /usr/local/bin/init.sh
 
-# 6. Lancer PHP-FPM (en mode foreground pour PID 1)
-CMD ["php-fpm", "-F"]
+# Répertoire de travail
+WORKDIR /var/www/wordpress
+
+# Utiliser le script d'init comme point d'entrée
+ENTRYPOINT ["/usr/local/bin/init.sh"]

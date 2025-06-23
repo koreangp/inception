@@ -2,16 +2,24 @@
 
 set -e
 
+: "${MYSQL_DATABASE:?Missing}"
+: "${MYSQL_USER:?Missing}"
+: "${MYSQL_PASSWORD:?Missing}"
+: "${MYSQL_ROOT_PASSWORD:?Missing}"
+
 mkdir -p /run/mysqld
 chown -R mysql:mysql /run/mysqld
 
 if [ ! -d /var/lib/mysql/mysql ]; then
+    echo "Initializing MariaDB data directory..."
     mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
 fi
 
-mysqld_safe --datadir=/var/lib/mysql & #lancer en background
+echo "Starting MariaDB for initialization..."
+mysqld_safe --datadir=/var/lib/mysql --skip-networking & #lancer en background et desac les connex tcp/ip
 
 until mysqladmin ping --silent; do
+    echo "Waiting for MariaDB to be ready..."
     sleep 1
 done
 
@@ -21,7 +29,11 @@ mysql -e "GRANT ALL PRIVILEGES ON ${MYSQL_DATABASE}.* TO '${MYSQL_USER}'@'%';"
 mysql -e "FLUSH PRIVILEGES;"
 
 #close en background pour relancer en pid 1
+echo "Shutting down MariaDB..."
 mysqladmin shutdown
 
+rm -f /root/.my.cnf
+
 #lancer en mysql en pid 1
+echo "MariaDB initialized. Starting in foreground mode..."
 exec mysqld_safe
