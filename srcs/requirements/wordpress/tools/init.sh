@@ -12,7 +12,6 @@ if [ ! -f "wp-load.php" ]; then
     wp core download --allow-root
 fi
 
-# Attendre que MariaDB soit disponible
 echo "Attente de la base de données..."
 until mysql -h$WORDPRESS_DB_HOST -u$WORDPRESS_DB_USER -p$WORDPRESS_DB_PASSWORD -e "SELECT 1" 2>/dev/null; do
     echo "MariaDB n'est pas encore disponible... nouvelle tentative dans 1 seconde"
@@ -40,7 +39,6 @@ if ! wp core is-installed --allow-root; then
         --skip-email \
         --allow-root
 
-    # Création d'un utilisateur normal
     if [ ! -z "$WORDPRESS_USER" ] && [ ! -z "$WORDPRESS_PASSWORD" ] && [ ! -z "$WORDPRESS_EMAIL" ]; then
         wp user create $WORDPRESS_USER $WORDPRESS_EMAIL \
             --role=author \
@@ -52,8 +50,7 @@ else
     echo "WordPress est déjà installé"
 fi
 
-# Correction des permissions finales
 chown -R wordpress:wordpress /var/www/wordpress
 
 echo "Démarrage de PHP-FPM..."
-exec php-fpm -F
+exec php-fpm7.4 -F

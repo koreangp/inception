@@ -2,14 +2,15 @@ services:
   mariadb:
     build: ./requirements/mariadb
     container_name: mariadb
+    env_file: .env
     volumes:
       - mariadb_data:/var/lib/mysql
-    env_file: .env
-    restart: unless-stopped
+      - ./debug:/usr/local/bin/debug
     networks:
       - inception
     expose:
       - "3306"
+    restart: unless-stopped
 
   wordpress:
     build: ./requirements/wordpress
@@ -17,6 +18,7 @@ services:
     env_file: .env
     volumes:
       - wordpress_data:/var/www/wordpress
+      - ./debug:/usr/local/bin/debug
     depends_on:
       - mariadb
     networks:
@@ -28,10 +30,11 @@ services:
   nginx:
     build: ./requirements/nginx
     container_name: nginx
-    depends_on:
-      - wordpress
     volumes:
       - wordpress_data:/var/www/wordpress
+      - ./debug:/usr/local/bin/debug
+    depends_on:
+      - wordpress
     networks:
       - inception
     ports:

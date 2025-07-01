@@ -16,7 +16,7 @@ if [ ! -d /var/lib/mysql/mysql ]; then
 fi
 
 echo "Starting MariaDB for initialization..."
-mysqld_safe --datadir=/var/lib/mysql --skip-networking & #lancer en background et desac les connex tcp/ip
+mysqld_safe --datadir=/var/lib/mysql & #lancer en background 
 
 until mysqladmin ping --silent; do
     echo "Waiting for MariaDB to be ready..."
@@ -36,4 +36,4 @@ rm -f /root/.my.cnf
 
 #lancer en mysql en pid 1
 echo "MariaDB initialized. Starting in foreground mode..."
-exec mysqld_safe
+exec mysqld_safe --bind-address=0.0.0.0

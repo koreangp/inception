@@ -29,6 +29,7 @@ COPY conf/wordpress.conf /etc/php/7.4/fpm/pool.d/wordpress.conf
 COPY tools/init.sh /usr/local/bin/init.sh
 RUN chmod +x /usr/local/bin/init.sh
 
+
 # Répertoire de travail
 WORKDIR /var/www/wordpress
 
