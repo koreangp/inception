@@ -5,7 +5,6 @@ services:
     env_file: .env
     volumes:
       - mariadb_data:/var/lib/mysql
-      - ./debug:/usr/local/bin/debug
     networks:
       - inception
     expose:
@@ -18,7 +17,7 @@ services:
     env_file: .env
     volumes:
       - wordpress_data:/var/www/wordpress
-      - ./debug:/usr/local/bin/debug
+
     depends_on:
       - mariadb
     networks:
@@ -32,7 +31,7 @@ services:
     container_name: nginx
     volumes:
       - wordpress_data:/var/www/wordpress
-      - ./debug:/usr/local/bin/debug
+
     depends_on:
       - wordpress
     networks:
